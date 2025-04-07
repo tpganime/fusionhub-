@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fusion Hub - Search Users</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* Global Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1);
+      background-size: 400% 400%;
+      animation: bgAnimation 15s ease infinite;
+      color: #333;
+      padding: 20px;
+    }
+    @keyframes bgAnimation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 1.8rem;
+      color: #333;
+    }
+    .search-bar {
+      display: flex;
+      margin-bottom: 1.5rem;
+    }
+    .search-bar input {
+      flex: 1;
+      padding: 0.8rem;
+      border: 1px solid #ddd;
+      border-radius: 4px 0 0 4px;
+      font-size: 1rem;
+    }
+    .search-bar button {
+      padding: 0.8rem 1rem;
+      border: none;
+      background: #3498db;
+      color: #fff;
+      font-size: 1rem;
+      border-radius: 0 4px 4px 0;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .search-bar button:hover {
+      background: #2980b9;
+    }
+    .results {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .user-card {
+      display: flex;
+      align-items: center;
+      background: #f9f9f9;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .user-card:hover {
+      background: #f1f1f1;
+    }
+    .user-card img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 15px;
+    }
+    .user-info {
+      flex: 1;
+    }
+    .user-info h3 {
+      font-size: 1.1rem;
+      margin-bottom: 4px;
+    }
+    .user-info p {
+      font-size: 0.9rem;
+      color: #666;
+    }
+    .user-card button {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 20px;
+      background: #27ae60;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.3s ease;
+    }
+    .user-card button:hover {
+      background: #1e8449;
+    }
+    .no-results {
+      text-align: center;
+      font-size: 1rem;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Search Users</h1>
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Enter username or name...">
+      <button id="search-btn">Search</button>
+    </div>
+    <div class="results" id="results"></div>
+  </div>
+  <script>
+    // Dummy users "database" with only the admin account.
+    const usersDatabase = [
+      {
+        username: "TANMAY (OWNER)",
+        name: "TANMAY (OWNER)",
+        bio: "Owner & Admin of Fusion Hub",
+        profilePic: "https://picsum.photos/seed/tanmay/100/100",
+        email: "tanmay@gmail.com"
+      }
+    ];
+    
+    // Retrieve logged-in user from localStorage (myUser) or initialize default if missing.
+    let myUser = JSON.parse(localStorage.getItem('myUser'));
+    if (!myUser) {
+      myUser = {
+        username: "FusionUser",
+        name: "Fusion User",
+        followingList: []
+      };
+      localStorage.setItem('myUser', JSON.stringify(myUser));
+    }
+    
+    // Function to render search results.
+    function renderResults(results) {
+      const resultsContainer = document.getElementById('results');
+      resultsContainer.innerHTML = "";
+      if (results.length === 0) {
+        resultsContainer.innerHTML = `<p class="no-results">No users found.</p>`;
+        return;
+      }
+      results.forEach(user => {
+        const card = document.createElement('div');
+        card.classList.add('user-card');
+        // When clicked, store the selected profile and go to profile.html.
+        card.addEventListener('click', function() {
+          localStorage.setItem('selectedProfile', JSON.stringify(user));
+          window.location.href = "profile.html";
+        });
+        const img = document.createElement('img');
+        img.src = user.profilePic;
+        img.alt = user.name;
+        const infoDiv = document.createElement('div');
+        infoDiv.classList.add('user-info');
+        const nameEl = document.createElement('h3');
+        nameEl.textContent = user.name;
+        const bioEl = document.createElement('p');
+        bioEl.textContent = user.bio;
+        infoDiv.appendChild(nameEl);
+        infoDiv.appendChild(bioEl);
+        // Follow button (for demonstration; admin account might not require follow)
+        const followBtn = document.createElement('button');
+        if (user.username === myUser.username) {
+          followBtn.style.display = "none";
+        } else {
+          let isFollowing = myUser.followingList.includes(user.username);
+          followBtn.textContent = isFollowing ? "Unfollow" : "Follow";
+          followBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (isFollowing) {
+              myUser.followingList = myUser.followingList.filter(u => u !== user.username);
+              isFollowing = false;
+              followBtn.textContent = "Follow";
+            } else {
+              myUser.followingList.push(user.username);
+              isFollowing = true;
+              followBtn.textContent = "Unfollow";
+            }
+            localStorage.setItem('myUser', JSON.stringify(myUser));
+          });
+        }
+        card.appendChild(img);
+        card.appendChild(infoDiv);
+        card.appendChild(followBtn);
+        resultsContainer.appendChild(card);
+      });
+    }
+    
+    // Search function: filter dummy database by name or username.
+    function searchUsers(query) {
+      return usersDatabase.filter(user =>
+        user.name.toLowerCase().includes(query.toLowerCase()) ||
+        user.username.toLowerCase().includes(query.toLowerCase())
+      );
+    }
+    
+    document.getElementById('search-btn').addEventListener('click', function() {
+      const query = document.getElementById('search-input').value.trim();
+      const results = searchUsers(query);
+      renderResults(results);
+    });
+    
+    document.getElementById('search-input').addEventListener('keyup', function(e) {
+      if (e.key === 'Enter') {
+        document.getElementById('search-btn').click();
+      }
+    });
+    
+    // Initially show the admin account.
+    renderResults(usersDatabase);
+  </script>
+</body>
+</html>
